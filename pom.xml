@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>co.featureflags</groupId>
+    <artifactId>ffc-java-intergrations</artifactId>
+    <packaging>pom</packaging>
+    <version>0.1</version>
+
+    <scm>
+        <tag>main</tag>
+        <connection>scm:git:git@github.com:feature-flags-co/ffc-java-intergrations.git</connection>
+        <developerConnection>scm:git:git@github.com:feature-flags-co/ffc-java-intergrations.git</developerConnection>
+        <url>https://github.com/feature-flags-co/ffc-java-intergrations/tree/main</url>
+    </scm>
+
+    <modules>
+        <module>ffc-java-springboot-parent</module>
+        <module>ffc-java-springboot</module>
+        <module>ffc-java-springboot-web</module>
+    </modules>
+
+</project>
