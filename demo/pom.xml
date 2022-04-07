@@ -13,12 +13,27 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>demo</name>
     <description>demo</description>
+
     <properties>
         <java.version>1.8</java.version>
 
         <!-- we need use okhttp3 4.9.3 version -->
         <okhttp3.version>4.9.3</okhttp3.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>github-ffc-java-intergrations-repo</id>
+            <name>The Maven Repository on Github</name>
+            <url>https://feature-flags-co.github.io/ffc-java-intergrations/maven-repo</url>
+        </repository>
+        <repository>
+            <id>github-ffc-java-sdk-repo</id>
+            <name>The Maven Repository on Github</name>
+            <url>https://feature-flags-co.github.io/ffc-java-sdk/maven-repo</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
