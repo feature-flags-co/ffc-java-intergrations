@@ -1,5 +1,6 @@
 package co.featureflags.spring.demo.greeting;
 
+import co.featureflags.spring.demo.TestRequestFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +27,7 @@ class GreetingControllerTest {
     @Test
     void hello() {
         final String url = String.format("http://localhost:%s/hello", randomServerPort);
-        HttpEntity<String> request = buildRequest();
+        HttpEntity<String> request = TestRequestFactory.New(identity);
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 
@@ -40,7 +41,7 @@ class GreetingControllerTest {
     @Test
     void hi() {
         final String url = String.format("http://localhost:%s/hi", randomServerPort);
-        HttpEntity<String> request = buildRequest();
+        HttpEntity<String> request = TestRequestFactory.New(identity);
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 
@@ -49,14 +50,5 @@ class GreetingControllerTest {
         assertThat(response.getBody())
                 .isNotNull()
                 .isEqualTo(hiMsg);
-    }
-
-    private HttpEntity<String> buildRequest() {
-        // add custom header to request
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("x-request-userId", identity);
-        headers.add("x-request-userName", identity);
-
-        return new HttpEntity<>(headers);
     }
 }
