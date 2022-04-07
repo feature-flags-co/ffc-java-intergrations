@@ -52,7 +52,7 @@ class GreetingControllerTest {
     }
 
     private HttpEntity<String> buildRequest() {
-        // request with 'x-request-userId' header
+        // add custom header to request
         HttpHeaders headers = new HttpHeaders();
         headers.add("x-request-userId", identity);
         headers.add("x-request-userName", identity);
