@@ -43,15 +43,15 @@ public class GreetingController {
         return ResponseEntity.ok("你好");
     }
 
-    @GetMapping("hi")
-    public ResponseEntity<String> hi() {
+    @GetMapping("v2/hello")
+    public ResponseEntity<String> helloV2() {
 
-        final String hiFeature = "hi-feature";
+        final String helloFeature = "hello-feature";
 
-        final Map<String, String> hiMap = new HashMap<String, String>() {{
-            put("en", "hi, how are you");
-            put("fr", "bonjour, ça va");
-            put("cn", "你好 :)");
+        final Map<String, String> helloMap = new HashMap<String, String>() {{
+            put("en", "hello");
+            put("fr", "bonjour");
+            put("cn", "你好");
         }};
 
         // fallback value will be returned if any error occurs during evaluating variation
@@ -59,16 +59,16 @@ public class GreetingController {
 
         // variation will be en, fr, cn or fallback-value
         // user will be auto-captured
-        String variation = client.variation(hiFeature, fallback);
+        String variation = client.variation(helloFeature, fallback);
 
         // if variation is fallback value
         if (Objects.equals(variation, fallback)) {
-            log.error(String.format("some error occurred during evaluating %s's variation", hiFeature));
+            log.error(String.format("some error occurred during evaluating %s's variation", helloFeature));
             return ResponseEntity.ok("fallback response value");
         }
 
         // get value based on variation
-        String response = hiMap.get(variation);
+        String response = helloMap.get(variation);
         return ResponseEntity.ok(response);
     }
 }

@@ -61,6 +61,8 @@ class SplittingControllerTest {
 
         // v2-result : v1-result should close to 1:4
         float proportion = (float) counter.get("v2-result") / counter.get("v1-result");
+
+        // close to 0.25 within 0.03 offset
         assertThat(proportion).isCloseTo(0.25f, within(0.03f));
     }
 }
