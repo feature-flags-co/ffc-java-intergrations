@@ -1,7 +1,6 @@
 package co.featureflags.spring;
 
 import co.featureflags.commons.model.FFCUser;
-import co.featureflags.commons.model.UserTag;
 import co.featureflags.server.exterior.FFCClient;
 import co.featureflags.server.integrations.FFCUserContextHolder;
 import org.slf4j.Logger;
@@ -12,12 +11,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FFCUserFilter implements Filter {
 
@@ -35,41 +30,16 @@ public class FFCUserFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         FFCUser user;
         try {
-            user = captureUser(httpServletRequest);
-            FFCUserContextHolder.setCurrentUser(user, true);
-            LOG.debug("capture {}", user);
+            user = FFCUserUtils.captureUser(httpServletRequest, client);
+            if (user != null) {
+                LOG.debug("capture {}", user);
+                FFCUserContextHolder.setCurrentUser(user, true);
+            }
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             user = FFCUserContextHolder.getCurrentUser();
             LOG.debug("remove {}", user);
             FFCUserContextHolder.remove();
-        }
-    }
-
-    private FFCUser captureUser(HttpServletRequest request) {
-        Map<UserTag, String> tags = new HashMap<>();
-        for (UserTag tag : client.getAllUserTags()) {
-            String value = getTagValue(request, tag);
-            if (value != null) {
-                tags.put(tag, value);
-            }
-        }
-        return FFCUser.of(tags);
-    }
-
-    private String getTagValue(HttpServletRequest request, UserTag tag) {
-        switch (tag.getSource()) {
-            case UserTag.HEADER:
-                return request.getHeader(tag.getRequestProperty());
-            case UserTag.COOKIE:
-                Cookie[] cookies = request.getCookies();
-                cookies = cookies == null ? new Cookie[]{} : cookies;
-                Cookie res = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(tag.getRequestProperty())).findFirst().orElse(null);
-                return res != null ? res.getValue() : null;
-            case UserTag.QUERY_STRING:
-                return request.getParameter(tag.getRequestProperty());
-            default:
-                return null;
         }
     }
 }

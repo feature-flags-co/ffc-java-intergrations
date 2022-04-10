@@ -9,10 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 @Component
 public class FeatureFlagHandler implements HandlerInterceptor {
@@ -28,10 +30,15 @@ public class FeatureFlagHandler implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         FFCUser user = FFCUserContextHolder.getCurrentUser();
-        LOG.debug("current user: {}", user);
         if (user == null) {
-            return true;
+            user = FFCUserUtils.captureUser(request, client);
+            if (user == null) {
+                return true;
+            }
+            FFCUserContextHolder.setCurrentUser(user, true);
         }
+        LOG.debug("current user: {}", user);
+
         Method method = null;
         if (handler instanceof HandlerMethod) {
             method = ((HandlerMethod) handler).getMethod();
@@ -48,21 +55,24 @@ public class FeatureFlagHandler implements HandlerInterceptor {
                     if (enabled || StringUtils.isEmpty(fallback)) {
                         return enabled;
                     } else {
+                        fallback = rebuildUrl(request, fallback);
                         request.getRequestDispatcher(fallback).forward(request, response);
                         return false;
                     }
                 } else {
-                    String variation = client.variation(featureFlagKey, null);
-                    if (flagValue.equals(variation)) {
+                    String variation = client.variation(featureFlagKey, "");
+                    if (StringUtils.isNotEmpty(variation) && flagValue.equals(variation)) {
                         return true;
                     }
                     for (RouteMapping routeMapping : others) {
                         if (routeMapping.value().equals(variation)) {
-                            request.getRequestDispatcher(routeMapping.path()).forward(request, response);
+                            String url = rebuildUrl(request, routeMapping.path());
+                            request.getRequestDispatcher(url).forward(request, response);
                             return false;
                         }
                     }
                     if (StringUtils.isNotEmpty(fallback)) {
+                        fallback = rebuildUrl(request, fallback);
                         request.getRequestDispatcher(fallback).forward(request, response);
                     }
                     return false;
@@ -71,4 +81,18 @@ public class FeatureFlagHandler implements HandlerInterceptor {
         }
         return true;
     }
+
+    private String rebuildUrl(HttpServletRequest request, String forwordUrl) {
+        String url = forwordUrl;
+        Map<String, String> pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        if (pathVariables != null) {
+            for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                url = url.replaceAll("(\\{" + key + "})", value);
+            }
+        }
+        return url;
+    }
+
 }

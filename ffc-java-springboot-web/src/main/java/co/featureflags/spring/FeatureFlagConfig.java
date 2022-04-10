@@ -1,6 +1,7 @@
 package co.featureflags.spring;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,6 +16,7 @@ public class FeatureFlagConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(featureFlagHandler)
-                .addPathPatterns("/**");
+                .addPathPatterns("/**")
+                .order(Ordered.LOWEST_PRECEDENCE);
     }
 }
