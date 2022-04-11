@@ -86,7 +86,7 @@ public class GreetingController {
 
     @GetMapping("v3/hello/{name}")
     @FeatureGate(feature = "hello-feature", value = "en", others = {
-            @RouteMapping(value = "cn", path = "v3/hello/{name}/cn"),
+            @RouteMapping(value = "cn", path = "/v3/hello/{name}/cn"),
     })
     public ResponseEntity<String> helloV3(@PathVariable String name) {
         return ResponseEntity.ok(String.format("hello, %s", name));
