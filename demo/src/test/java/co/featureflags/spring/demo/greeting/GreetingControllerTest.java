@@ -53,4 +53,21 @@ class GreetingControllerTest {
                 .isNotNull()
                 .isEqualTo(helloMsg);
     }
+
+    @Test
+    void helloV3() {
+        final String identity = "cn-user-1";
+        final String helloMsg = "你好, jack";
+
+        final String url = String.format("http://localhost:%s/v3/hello/jack", randomServerPort);
+        HttpEntity<String> request = TestRequestFactory.New(identity);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(response.getBody())
+                .isNotNull()
+                .isEqualTo(helloMsg);
+    }
 }

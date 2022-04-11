@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -27,8 +28,9 @@ public class GreetingController {
     @GetMapping("/hello")
     @FeatureGate(feature = "hello-feature", value = "en", others = {
             @RouteMapping(value = "fr", path = "/hello/fr"),
-            @RouteMapping(value = "cn", path = "/hello/cn")
-    })
+            @RouteMapping(value = "cn", path = "/hello/cn"),
+            @RouteMapping(value = "default", path = "/hello/default"),
+    }, fallback = "/hello/fallback")
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok("hello");
     }
@@ -41,6 +43,16 @@ public class GreetingController {
     @GetMapping("/hello/cn")
     public ResponseEntity<String> helloInChinese() {
         return ResponseEntity.ok("你好");
+    }
+
+    @GetMapping("/hello/default")
+    public ResponseEntity<String> helloDefault() {
+        return ResponseEntity.ok("default");
+    }
+
+    @GetMapping("/hello/fallback")
+    public ResponseEntity<String> helloFallback() {
+        return ResponseEntity.ok("fallback");
     }
 
     @GetMapping("v2/hello")
@@ -70,5 +82,18 @@ public class GreetingController {
         // get value based on variation
         String response = helloMap.get(variation);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("v3/hello/{name}")
+    @FeatureGate(feature = "hello-feature", value = "en", others = {
+            @RouteMapping(value = "cn", path = "v3/hello/{name}/cn"),
+    })
+    public ResponseEntity<String> helloV3(@PathVariable String name) {
+        return ResponseEntity.ok(String.format("hello, %s", name));
+    }
+
+    @GetMapping("v3/hello/{name}/cn")
+    public ResponseEntity<String> helloV3InChinese(@PathVariable String name) {
+        return ResponseEntity.ok(String.format("你好, %s", name));
     }
 }
