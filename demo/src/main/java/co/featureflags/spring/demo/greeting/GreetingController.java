@@ -55,7 +55,7 @@ public class GreetingController {
         return ResponseEntity.ok("fallback");
     }
 
-    @GetMapping("v2/hello")
+    @GetMapping("/v2/hello")
     public ResponseEntity<String> helloV2() {
 
         final String helloFeature = "hello-feature";
@@ -84,7 +84,7 @@ public class GreetingController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("v3/hello/{name}")
+    @GetMapping("/v3/hello/{name}")
     @FeatureGate(feature = "hello-feature", value = "en", others = {
             @RouteMapping(value = "cn", path = "/v3/hello/{name}/cn"),
     })
@@ -92,7 +92,7 @@ public class GreetingController {
         return ResponseEntity.ok(String.format("hello, %s", name));
     }
 
-    @GetMapping("v3/hello/{name}/cn")
+    @GetMapping("/v3/hello/{name}/cn")
     public ResponseEntity<String> helloV3InChinese(@PathVariable String name) {
         return ResponseEntity.ok(String.format("你好, %s", name));
     }
