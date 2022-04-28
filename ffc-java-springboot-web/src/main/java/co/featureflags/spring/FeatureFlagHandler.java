@@ -52,27 +52,34 @@ public class FeatureFlagHandler implements HandlerInterceptor {
                 RouteMapping[] others = gate.others();
                 if (StringUtils.isEmpty(flagValue)) {
                     boolean enabled = client.isEnabled(featureFlagKey);
-                    if (enabled || StringUtils.isEmpty(fallback)) {
-                        return enabled;
+                    if (enabled) {
+                        LOG.info("FFC JAVA Integration: User {}, Feature Flag {}, Flag Value {}, go to {}", user.getKey(), featureFlagKey, enabled, request.getRequestURI());
+                        return true;
+                    } else if (StringUtils.isEmpty(fallback)) {
+                        return false;
                     } else {
                         fallback = rebuildUrl(request, fallback);
+                        LOG.info("FFC JAVA Integration: User {}, Feature Flag {}, Flag Value {}, redirect to {}", user.getKey(), featureFlagKey, false, fallback);
                         request.getRequestDispatcher(fallback).forward(request, response);
                         return false;
                     }
                 } else {
                     String variation = client.variation(featureFlagKey, "");
                     if (StringUtils.isNotEmpty(variation) && flagValue.equals(variation)) {
+                        LOG.info("FFC JAVA Integration: User {}, Feature Flag {}, Flag Value {}, go to {}", user.getKey(), featureFlagKey, variation, request.getRequestURI());
                         return true;
                     }
                     for (RouteMapping routeMapping : others) {
                         if (routeMapping.value().equals(variation)) {
                             String url = rebuildUrl(request, routeMapping.path());
+                            LOG.info("FFC JAVA Integration: User {}, Feature Flag {}, Flag Value {}, redirect to {}", user.getKey(), featureFlagKey, variation, url);
                             request.getRequestDispatcher(url).forward(request, response);
                             return false;
                         }
                     }
                     if (StringUtils.isNotEmpty(fallback)) {
                         fallback = rebuildUrl(request, fallback);
+                        LOG.info("FFC JAVA Integration: User {}, Feature Flag {}, Flag Value {}, redirect to {}", user.getKey(), featureFlagKey, variation, fallback);
                         request.getRequestDispatcher(fallback).forward(request, response);
                     }
                     return false;
