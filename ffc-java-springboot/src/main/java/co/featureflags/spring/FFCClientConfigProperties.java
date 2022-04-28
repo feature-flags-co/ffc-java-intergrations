@@ -22,5 +22,7 @@ public class FFCClientConfigProperties {
 
     private String proxyPassword;
 
+    private boolean offline = false;
+
 
 }

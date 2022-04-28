@@ -36,7 +36,7 @@ public class FFCClientConfiguration {
         InsightProcessorBuilder insightProcessorBuilder = Factory.insightProcessorFactory()
                 .eventUri(properties.getEventUri());
         FFCConfig config = new FFCConfig.Builder()
-                .offline(false)
+                .offline(properties.isOffline())
                 .startWaitTime(Duration.ofSeconds(properties.getStartWait()))
                 .httpConfigFactory(builder)
                 .updateProcessorFactory(streamingBuilder)
