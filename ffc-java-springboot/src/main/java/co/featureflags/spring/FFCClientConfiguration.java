@@ -8,6 +8,7 @@ import co.featureflags.server.StreamingBuilder;
 import co.featureflags.server.exterior.FFCClient;
 import co.featureflags.server.exterior.HttpConfigurationBuilder;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,25 +24,34 @@ public class FFCClientConfiguration {
     @Bean
     public FFCClient ffcClient(FFCClientConfigProperties properties) {
         checkArgument(Base64.isBase64(properties.getEnvSecret()), "envSecret is invalid");
-        HttpConfigurationBuilder builder = Factory.httpConfigFactory();
+        HttpConfigurationBuilder httpConfigFactory = Factory.httpConfigFactory();
         if (properties.getProxyHost() != null && properties.getProxyPort() > 0) {
-            builder.httpProxy(properties.getProxyHost(), properties.getProxyPort());
+            httpConfigFactory.httpProxy(properties.getProxyHost(), properties.getProxyPort());
             if (properties.getProxyUser() != null && properties.getProxyPassword() != null) {
-                builder.passwordAuthenticator(properties.getProxyUser(), properties.getProxyPassword());
+                httpConfigFactory.passwordAuthenticator(properties.getProxyUser(), properties.getProxyPassword());
             }
         }
-        StreamingBuilder streamingBuilder = Factory.streamingBuilder()
-                .newStreamingURI(properties.getStreamUri());
 
-        InsightProcessorBuilder insightProcessorBuilder = Factory.insightProcessorFactory()
-                .eventUri(properties.getEventUri());
-        FFCConfig config = new FFCConfig.Builder()
+        String streamUri = properties.getStreamUri();
+        StreamingBuilder streamingBuilder =
+                StringUtils.isBlank(streamUri) ? null : Factory.streamingBuilder().newStreamingURI(streamUri);
+
+        String eventUri = properties.getEventUri();
+        InsightProcessorBuilder insightProcessorBuilder =
+                StringUtils.isBlank(eventUri) ? null : Factory.insightProcessorFactory().eventUri(eventUri);
+
+        FFCConfig.Builder builder = new FFCConfig.Builder()
                 .offline(properties.isOffline())
                 .startWaitTime(Duration.ofSeconds(properties.getStartWait()))
-                .httpConfigFactory(builder)
-                .updateProcessorFactory(streamingBuilder)
-                .insightProcessorFactory(insightProcessorBuilder)
-                .build();
-        return new FFCClientImp(properties.getEnvSecret(), config);
+                .httpConfigFactory(httpConfigFactory);
+
+        if (streamingBuilder != null) {
+            builder.updateProcessorFactory(streamingBuilder);
+        }
+
+        if (insightProcessorBuilder != null) {
+            builder.insightProcessorFactory(insightProcessorBuilder);
+        }
+        return new FFCClientImp(properties.getEnvSecret(), builder.build());
     }
 }

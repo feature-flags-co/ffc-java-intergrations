@@ -10,9 +10,9 @@ public class FFCClientConfigProperties {
 
     private int startWait = 15;
 
-    private String streamUri = "wss://api.feature-flags.co";
+    private String streamUri;
 
-    private String eventUri = "https://api.feature-flags.co";
+    private String eventUri;
 
     private String proxyHost;
 
